@@ -1,81 +1,132 @@
 package com.momen.bugit.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.momen.bugit.ui.components.ImageSelector
+import com.momen.bugit.ui.viewmodel.BugFormViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BugFormScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToSuccess: () -> Unit
+    onNavigateToSuccess: () -> Unit,
+    viewModel: BugFormViewModel = viewModel()
 ) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    val formState by viewModel.formState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.clearError()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TextButton(onClick = onNavigateBack) {
-                Text("Backs")
-            }
-            Text(
-                text = "Report Bug",
-                style = MaterialTheme.typography.headlineSmall
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Report Bug",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface
             )
-            Spacer(modifier = Modifier.width(64.dp))
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = title,
-            onValueChange = { title = it },
-            label = { Text("Bug Title") },
-            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Description") },
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            maxLines = 4
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Text("Image will be added here")
+            OutlinedTextField(
+                value = formState.title,
+                onValueChange = viewModel::updateTitle,
+                label = { Text("Bug Title") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = formState.errorMessage.isNotBlank() && formState.title.isBlank(),
+                supportingText = if (formState.errorMessage.isNotBlank() && formState.title.isBlank()) {
+                    { Text(formState.errorMessage) }
+                } else null
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = formState.description,
+                onValueChange = viewModel::updateDescription,
+                label = { Text("Description") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                maxLines = 4,
+                isError = formState.errorMessage.isNotBlank() && formState.description.isBlank(),
+                supportingText = if (formState.errorMessage.isNotBlank() && formState.description.isBlank()) {
+                    { Text(formState.errorMessage) }
+                } else null
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            ImageSelector(
+                imagePath = formState.imagePath,
+                imageUrl = formState.imageUrl,
+                onCameraClick = {
+                    // TODO: Implement camera capture
+                },
+                onGalleryClick = {
+                    // TODO: Implement gallery selection
+                }
+            )
+
+            if (formState.errorMessage.isNotBlank() && formState.imagePath.isBlank() && formState.imageUrl.isBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = formState.errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onNavigateToSuccess,
-            modifier = Modifier.fillMaxWidth()
+            onClick = { viewModel.validateAndSubmit(onNavigateToSuccess) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !formState.isSubmitting
         ) {
-            Text("Submit Bug Report")
+            if (formState.isSubmitting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Submitting...")
+            } else {
+                Text("Submit Bug Report")
+            }
         }
     }
 }
