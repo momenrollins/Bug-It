@@ -6,12 +6,11 @@ data class ImageUploadResponse(
     val errorMessage: String = ""
 )
 
-// Simple Imgur API response - only what we need
 data class ImgurResponse(
     val data: ImgurData?,
     val success: Boolean
 )
 
 data class ImgurData(
-    val link: String  // Only need the image URL
+    val link: String
 )

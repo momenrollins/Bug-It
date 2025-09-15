@@ -7,7 +7,6 @@ data class Bug(
     val imagePath: String = ""
 )
 
-// Future extensibility - optional fields
 data class ExtendedBug(
     val title: String = "",
     val description: String = "",

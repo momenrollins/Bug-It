@@ -7,10 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.momen.bugit.navigation.BugItNavigation
 import com.momen.bugit.ui.theme.BugItTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,10 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BugItTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    BugItApp(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -31,9 +28,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun BugItApp(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+    BugItNavigation(navController = navController, modifier = modifier)
 }
