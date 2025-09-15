@@ -12,35 +12,8 @@ data class ImageBBResponse(
 )
 
 data class ImageBBData(
-    val id: String,
-    val title: String,
-    val url_viewer: String,
     val url: String,
-    val display_url: String,
-    val width: String,
-    val height: String,
-    val size: String,
-    val time: String,
-    val expiration: String,
-    val image: ImageBBImage,
-    val thumb: ImageBBThumb,
-    val delete_url: String
-)
-
-data class ImageBBImage(
-    val filename: String,
-    val name: String,
-    val mime: String,
-    val extension: String,
-    val url: String
-)
-
-data class ImageBBThumb(
-    val filename: String,
-    val name: String,
-    val mime: String,
-    val extension: String,
-    val url: String
+    val display_url: String
 )
 
 interface ImageUploadApiService {

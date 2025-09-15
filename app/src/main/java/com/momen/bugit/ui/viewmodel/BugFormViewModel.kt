@@ -62,7 +62,6 @@ class BugFormViewModel : ViewModel() {
             _formState.value = currentState.copy(isSubmitting = true)
 
             try {
-                // TODO: Implement actual submission logic
                 kotlinx.coroutines.delay(2000) // Simulate network call
                 onSuccess()
             } catch (e: Exception) {

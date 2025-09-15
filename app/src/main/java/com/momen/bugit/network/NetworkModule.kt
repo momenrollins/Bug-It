@@ -15,7 +15,6 @@ object NetworkModule {
     
     private val gson: Gson by lazy {
         GsonBuilder()
-            .setLenient()
             .create()
     }
     
