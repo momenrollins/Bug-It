@@ -24,7 +24,16 @@ fun BugItNavigation(navController: NavHostController, modifier: Modifier = Modif
             )
         }
         
-        composable(Screen.BugForm.route) {
+        composable(
+            route = "${Screen.BugForm.route}?imageUri={imageUri}",
+            arguments = listOf(
+                androidx.navigation.navArgument("imageUri") {
+                    type = androidx.navigation.NavType.StringType
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri")
             BugFormScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -35,7 +44,8 @@ fun BugItNavigation(navController: NavHostController, modifier: Modifier = Modif
                             inclusive = false
                         }
                     }
-                }
+                },
+                initialImageUri = imageUri
             )
         }
         

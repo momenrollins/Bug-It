@@ -84,6 +84,9 @@ dependencies {
     // Google Sheets API
     implementation(libs.google.sheets.api)
     
+    // Permissions
+    implementation(libs.accompanist.permissions)
+    
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

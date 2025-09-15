@@ -1,8 +1,7 @@
 package com.momen.bugit.ui.components
 
-import androidx.compose.foundation.background
+import android.net.Uri
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,19 +11,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun ImageSelector(
     imagePath: String,
     imageUrl: String,
-    onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasImage = imagePath.isNotBlank() || imageUrl.isNotBlank()
+    val context = LocalContext.current
     
     Card(
         modifier = modifier
@@ -44,16 +46,46 @@ fun ImageSelector(
         )
     ) {
         if (hasImage) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "📷 Image Selected",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            val imageModel = if (imagePath.isNotBlank()) {
+                android.util.Log.d("BugIt", "ImageSelector - imagePath: $imagePath")
+                if (imagePath.startsWith("file://")) {
+                    // Handle file URIs
+                    val filePath = imagePath.substring(7) // Remove "file://" prefix
+                    android.util.Log.d("BugIt", "ImageSelector - file path: $filePath")
+                    java.io.File(filePath)
+                } else {
+                    // Handle content URIs - try different approaches
+                    android.util.Log.d("BugIt", "ImageSelector - using content URI directly")
+                    try {
+                        val uri = Uri.parse(imagePath)
+                        ImageRequest.Builder(context)
+                            .data(uri)
+                            .crossfade(true)
+                            .build()
+                    } catch (e: Exception) {
+                        android.util.Log.e("BugIt", "Error creating ImageRequest: ${e.message}")
+                        imagePath
+                    }
+                }
+            } else {
+                android.util.Log.d("BugIt", "ImageSelector - using imageUrl: $imageUrl")
+                imageUrl
             }
+            
+            AsyncImage(
+                model = imageModel,
+                contentDescription = "Selected Image",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop,
+                onError = { 
+                    android.util.Log.e("BugIt", "AsyncImage error: ${it.result.throwable?.message}")
+                },
+                onSuccess = {
+                    android.util.Log.d("BugIt", "AsyncImage loaded successfully")
+                }
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -79,22 +111,11 @@ fun ImageSelector(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                OutlinedButton(
+                    onClick = onGalleryClick,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Button(
-                        onClick = onCameraClick,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("📷 Camera")
-                    }
-                    
-                    OutlinedButton(
-                        onClick = onGalleryClick,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("🖼️ Gallery")
-                    }
+                    Text("🖼️ Select from Gallery")
                 }
             }
         }

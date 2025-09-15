@@ -1,5 +1,10 @@
 package com.momen.bugit.ui.screens
 
+import android.Manifest
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,20 +13,42 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.momen.bugit.ui.components.ImageSelector
 import com.momen.bugit.ui.viewmodel.BugFormViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun BugFormScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSuccess: () -> Unit,
+    initialImageUri: String? = null,
     viewModel: BugFormViewModel = viewModel()
 ) {
     val formState by viewModel.formState.collectAsState()
+    val context = LocalContext.current
+
+    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+    
+    val permissionState = rememberPermissionState(permission)
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { selectedUri ->
+            viewModel.updateImagePath(selectedUri.toString())
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.clearError()
@@ -92,11 +119,12 @@ fun BugFormScreen(
             ImageSelector(
                 imagePath = formState.imagePath,
                 imageUrl = formState.imageUrl,
-                onCameraClick = {
-                    // TODO: Implement camera capture
-                },
                 onGalleryClick = {
-                    // TODO: Implement gallery selection
+                    if (permissionState.status.isGranted) {
+                        galleryLauncher.launch("image/*")
+                    } else {
+                        permissionState.launchPermissionRequest()
+                    }
                 }
             )
 
