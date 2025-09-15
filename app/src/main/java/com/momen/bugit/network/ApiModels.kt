@@ -1,9 +1,15 @@
 package com.momen.bugit.network
 
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.Path
+data class ImageBBResponse(
+    val data: ImageBBData?,
+    val success: Boolean,
+    val status: Int
+)
+
+data class ImageBBData(
+    val url: String,
+    val display_url: String
+)
 
 data class AppendRequest(
     val values: List<List<String>>,
@@ -24,12 +30,3 @@ data class Updates(
     val updatedColumns: Int,
     val updatedCells: Int
 )
-
-interface GoogleSheetsApiService {
-    @POST("v4/spreadsheets/{spreadsheetId}/values/{range}:append")
-    suspend fun appendValues(
-        @Path("spreadsheetId") spreadsheetId: String,
-        @Path("range") range: String,
-        @Body request: AppendRequest
-    ): Response<AppendResponse>
-}

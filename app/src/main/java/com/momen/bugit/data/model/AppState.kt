@@ -12,5 +12,14 @@ data class BugFormState(
     val imagePath: String = "",
     val imageUrl: String = "",
     val isSubmitting: Boolean = false,
+    val submissionStep: SubmissionStep = SubmissionStep.Idle,
     val errorMessage: String = ""
 )
+
+enum class SubmissionStep {
+    Idle,
+    UploadingImage,
+    SubmittingToSheets,
+    Success,
+    Error
+}

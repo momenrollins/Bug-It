@@ -22,6 +22,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.momen.bugit.ui.components.ImageSelector
 import com.momen.bugit.ui.viewmodel.BugFormViewModel
+import com.momen.bugit.data.model.SubmissionStep
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -141,7 +142,7 @@ fun BugFormScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.validateAndSubmit(onNavigateToSuccess) },
+            onClick = { viewModel.validateAndSubmit(context, onNavigateToSuccess) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !formState.isSubmitting
         ) {
@@ -151,7 +152,13 @@ fun BugFormScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Submitting...")
+                Text(
+                    when (formState.submissionStep) {
+                        SubmissionStep.UploadingImage -> "Uploading Image..."
+                        SubmissionStep.SubmittingToSheets -> "Submitting to Google Sheets..."
+                        else -> "Submitting..."
+                    }
+                )
             } else {
                 Text("Submit Bug Report")
             }

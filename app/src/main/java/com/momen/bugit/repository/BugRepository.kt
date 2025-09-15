@@ -1,9 +1,13 @@
 package com.momen.bugit.repository
 
-import com.momen.bugit.network.GoogleSheetsApiService
-import com.momen.bugit.network.ImageUploadApiService
+import com.momen.bugit.network.BugItApiService
+import com.momen.bugit.network.ImageBBResponse
+import com.momen.bugit.network.AppendRequest
 import com.momen.bugit.utils.DateUtils
 import android.util.Base64
+import android.content.Context
+import android.net.Uri
+import java.io.InputStream
 
 data class BugData(
     val timestamp: String,
@@ -19,14 +23,32 @@ data class ImageUploadResult(
 )
 
 class BugRepository(
-    private val googleSheetsApiService: GoogleSheetsApiService,
-    private val imageUploadApiService: ImageUploadApiService
+    private val imageUploadService: BugItApiService,
+    private val sheetsService: BugItApiService,
+    private val context: Context
 ) {
     
+    suspend fun uploadImageFromUri(uriString: String, imageBBApiKey: String): Result<ImageUploadResult> {
+        return try {
+            val uri = Uri.parse(uriString)
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            
+            if (inputStream != null) {
+                val imageData = inputStream.readBytes()
+                inputStream.close()
+                uploadImage(imageData, imageBBApiKey)
+            } else {
+                Result.failure(Exception("Could not open input stream for URI: $uriString"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun uploadImage(imageData: ByteArray, imageBBApiKey: String): Result<ImageUploadResult> {
         return try {
             val base64Image = Base64.encodeToString(imageData, Base64.DEFAULT)
-            val response = imageUploadApiService.uploadImage(
+            val response = imageUploadService.uploadImage(
                 apiKey = imageBBApiKey,
                 imageData = base64Image
             )
@@ -63,11 +85,12 @@ class BugRepository(
                 )
             )
             
-            val request = com.momen.bugit.network.AppendRequest(values = values)
+            val request = AppendRequest(values = values)
             
-            val response = googleSheetsApiService.appendValues(
+            val response = sheetsService.appendValues(
                 spreadsheetId = spreadsheetId,
                 range = range,
+                apiKey = apiKey,
                 request = request
             )
             
