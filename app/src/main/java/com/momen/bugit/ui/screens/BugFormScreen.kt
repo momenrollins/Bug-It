@@ -57,6 +57,15 @@ fun BugFormScreen(
         viewModel.clearError()
     }
 
+    // Handle initial image URI from other apps
+    LaunchedEffect(initialImageUri) {
+        Log.d("BugFormScreen", "Initial image URI: $initialImageUri")
+        initialImageUri?.let { uri ->
+            Log.d("BugFormScreen", "Setting image path: $uri")
+            viewModel.updateImagePath(uri)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
