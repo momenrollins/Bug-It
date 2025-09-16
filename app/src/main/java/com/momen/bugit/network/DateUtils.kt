@@ -1,4 +1,4 @@
-package com.momen.bugit.utils
+package com.momen.bugit.network
 
 import java.text.SimpleDateFormat
 import java.util.Date

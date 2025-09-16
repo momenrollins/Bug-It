@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Bug It"
 include(":app")
+include(":network-module")
  

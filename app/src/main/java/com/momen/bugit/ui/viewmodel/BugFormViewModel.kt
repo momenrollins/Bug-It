@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.momen.bugit.data.model.BugFormState
 import com.momen.bugit.data.model.SubmissionStep
-import com.momen.bugit.repository.BugRepository
-import com.momen.bugit.config.ApiConfig
+import com.momen.bugit.network.BugRepository
+import com.momen.bugit.network.ApiConfig
 import com.momen.bugit.network.NetworkModule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -146,8 +146,8 @@ class BugFormViewModel : ViewModel() {
 
                 // Step 2: Submit to Google Sheets
                 android.util.Log.d("BugIt", "Submitting to Google Sheets...")
-                val bugData = com.momen.bugit.repository.BugData(
-                    timestamp = com.momen.bugit.utils.DateUtils.getCurrentTimestamp(),
+                        val bugData = com.momen.bugit.network.BugData(
+                    timestamp = com.momen.bugit.network.DateUtils.getCurrentTimestamp(),
                     title = currentState.title,
                     description = currentState.description,
                     imageUrl = imageUrl

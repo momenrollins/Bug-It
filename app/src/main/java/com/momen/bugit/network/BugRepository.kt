@@ -1,27 +1,16 @@
-package com.momen.bugit.repository
+package com.momen.bugit.network
 
 import com.momen.bugit.network.BugItApiService
 import com.momen.bugit.network.ImageBBResponse
 import com.momen.bugit.network.AppendRequest
 import com.momen.bugit.network.GoogleSheetsAuthService
-import com.momen.bugit.utils.DateUtils
+import com.momen.bugit.network.DateUtils
+import com.momen.bugit.network.BugData
+import com.momen.bugit.network.ImageUploadResult
 import android.util.Base64
 import android.content.Context
 import android.net.Uri
 import java.io.InputStream
-
-data class BugData(
-    val timestamp: String,
-    val title: String,
-    val description: String,
-    val imageUrl: String
-)
-
-data class ImageUploadResult(
-    val success: Boolean,
-    val imageUrl: String = "",
-    val errorMessage: String = ""
-)
 
 class BugRepository(
     private val imageUploadService: BugItApiService,

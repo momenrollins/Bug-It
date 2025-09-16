@@ -1,4 +1,4 @@
-package com.momen.bugit.config
+package com.momen.bugit.network
 
 object ApiConfig {
     const val GOOGLE_SHEETS_API_KEY = "AIzaSyALPRTwI3ewwpvf8NYfmZ_cYXpozSfuvGE"
