@@ -52,6 +52,19 @@ class BugFormViewModel : ViewModel() {
         )
     }
 
+    fun updateScreenshotPath(screenshotPath: String) {
+        _formState.value = _formState.value.copy(
+            imagePath = screenshotPath,
+            errorMessage = ""
+        )
+    }
+
+    fun setScreenshotError(errorMessage: String) {
+        _formState.value = _formState.value.copy(
+            errorMessage = errorMessage
+        )
+    }
+
     fun validateAndSubmit(context: Context, onSuccess: () -> Unit) {
         val currentState = _formState.value
 

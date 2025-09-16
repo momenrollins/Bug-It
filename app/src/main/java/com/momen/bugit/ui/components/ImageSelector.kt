@@ -23,6 +23,7 @@ fun ImageSelector(
     imagePath: String,
     imageUrl: String,
     onGalleryClick: () -> Unit,
+    onScreenshotClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasImage = imagePath.isNotBlank() || imageUrl.isNotBlank()
@@ -111,11 +112,23 @@ fun ImageSelector(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                OutlinedButton(
-                    onClick = onGalleryClick,
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("🖼️ Select from Gallery")
+                    OutlinedButton(
+                        onClick = onScreenshotClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("📸 Screenshot")
+                    }
+                    
+                    OutlinedButton(
+                        onClick = onGalleryClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🖼️ Gallery")
+                    }
                 }
             }
         }

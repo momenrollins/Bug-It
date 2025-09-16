@@ -3,11 +3,13 @@ package com.momen.bugit.ui.screens
 import android.Manifest
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -125,6 +127,26 @@ fun BugFormScreen(
                         galleryLauncher.launch("image/*")
                     } else {
                         permissionState.launchPermissionRequest()
+                    }
+                },
+                onScreenshotClick = {
+                    try {
+                        val activity = context as? androidx.activity.ComponentActivity
+                        if (activity != null) {
+                            val rootView = activity.findViewById<android.view.View>(android.R.id.content)
+                            val screenshotPath = com.momen.bugit.utils.ScreenshotUtils.captureAndSaveView(context, rootView)
+                            if (screenshotPath != null) {
+                                viewModel.updateScreenshotPath(screenshotPath)
+                                Log.d("BugFormScreen", "Screenshot captured: $screenshotPath")
+                            } else {
+                                viewModel.setScreenshotError("Failed to capture screenshot")
+                            }
+                        } else {
+                            viewModel.setScreenshotError("Unable to access activity for screenshot")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("BugFormScreen", "Error capturing screenshot: ${e.message}")
+                        viewModel.setScreenshotError("Error capturing screenshot: ${e.message}")
                     }
                 }
             )

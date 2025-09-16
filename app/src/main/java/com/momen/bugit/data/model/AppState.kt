@@ -11,6 +11,9 @@ data class BugFormState(
     val description: String = "",
     val imagePath: String = "",
     val imageUrl: String = "",
+    val priority: String = "Medium",
+    val labels: String = "",
+    val assignee: String = "",
     val isSubmitting: Boolean = false,
     val submissionStep: SubmissionStep = SubmissionStep.Idle,
     val errorMessage: String = ""
