@@ -3,6 +3,7 @@ package com.momen.bugit.repository
 import com.momen.bugit.network.BugItApiService
 import com.momen.bugit.network.ImageBBResponse
 import com.momen.bugit.network.AppendRequest
+import com.momen.bugit.network.GoogleSheetsAuthService
 import com.momen.bugit.utils.DateUtils
 import android.util.Base64
 import android.content.Context
@@ -27,6 +28,7 @@ class BugRepository(
     private val sheetsService: BugItApiService,
     private val context: Context
 ) {
+    private val googleSheetsAuthService = GoogleSheetsAuthService(context)
     
     suspend fun uploadImageFromUri(uriString: String, imageBBApiKey: String): Result<ImageUploadResult> {
         return try {
@@ -85,20 +87,12 @@ class BugRepository(
                 )
             )
             
-            val request = AppendRequest(values = values)
-            
-            val response = sheetsService.appendValues(
+            // Use the service account authentication
+            googleSheetsAuthService.appendValues(
                 spreadsheetId = spreadsheetId,
                 range = range,
-                apiKey = apiKey,
-                request = request
+                values = values
             )
-            
-            if (response.isSuccessful) {
-                Result.success(true)
-            } else {
-                Result.failure(Exception("Failed to submit to sheets: ${response.message()}"))
-            }
         } catch (e: Exception) {
             Result.failure(e)
         }
