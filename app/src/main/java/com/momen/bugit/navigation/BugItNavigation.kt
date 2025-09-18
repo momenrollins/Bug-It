@@ -3,8 +3,10 @@ package com.momen.bugit.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.momen.bugit.ui.screens.HomeScreen
 import com.momen.bugit.ui.screens.BugFormScreen
 import com.momen.bugit.ui.screens.SuccessScreen
@@ -27,8 +29,8 @@ fun BugItNavigation(navController: NavHostController, modifier: Modifier = Modif
         composable(
             route = "${Screen.BugForm.route}?imageUri={imageUri}",
             arguments = listOf(
-                androidx.navigation.navArgument("imageUri") {
-                    type = androidx.navigation.NavType.StringType
+                navArgument("imageUri") {
+                    type = NavType.StringType
                     nullable = true
                 }
             )

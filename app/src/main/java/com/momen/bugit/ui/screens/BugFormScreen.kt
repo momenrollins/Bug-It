@@ -64,7 +64,7 @@ fun BugFormScreen(
     } else {
         Manifest.permission.READ_EXTERNAL_STORAGE
     }
-    
+
     val permissionState = rememberPermissionState(permission)
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -77,7 +77,7 @@ fun BugFormScreen(
 
     // Track if we need to launch gallery after permission
     var shouldLaunchGallery by remember { mutableStateOf(false) }
-    
+
     // Handle permission result
     LaunchedEffect(permissionState.status) {
         if (permissionState.status.isGranted && shouldLaunchGallery) {
@@ -94,7 +94,6 @@ fun BugFormScreen(
     LaunchedEffect(initialImageUri) {
         Log.d("BugFormScreen", "Initial image URI: $initialImageUri")
         initialImageUri?.let { uri ->
-            Log.d("BugFormScreen", "Setting image path: $uri")
             viewModel.updateImagePath(uri)
         }
     }
@@ -176,8 +175,10 @@ fun BugFormScreen(
                     try {
                         val activity = context as? androidx.activity.ComponentActivity
                         if (activity != null) {
-                            val rootView = activity.findViewById<android.view.View>(android.R.id.content)
-                            val screenshotPath = ScreenshotUtils.captureAndSaveView(context, rootView)
+                            val rootView =
+                                activity.findViewById<android.view.View>(android.R.id.content)
+                            val screenshotPath =
+                                ScreenshotUtils.captureAndSaveView(context, rootView)
                             if (screenshotPath != null) {
                                 viewModel.updateScreenshotPath(screenshotPath)
                                 Log.d("BugFormScreen", "Screenshot captured: $screenshotPath")
@@ -194,7 +195,8 @@ fun BugFormScreen(
                 }
             )
 
-            if (formState.errorMessage.isNotBlank() && formState.imagePath.isBlank() && formState.imageUrl.isBlank()) {
+            if (formState.errorMessage.isNotBlank() &&
+                (formState.imagePath.isBlank() && formState.imageUrl.isBlank() || formState.submissionStep == SubmissionStep.Error)) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = formState.errorMessage,

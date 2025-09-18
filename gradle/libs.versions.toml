@@ -60,7 +60,6 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # Google Sheets API
 google-sheets-api = { group = "com.google.apis", name = "google-api-services-sheets", version.ref = "googleSheetsApi" }
-google-auth-library = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "googleAuth" }
 
 # Permissions
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }

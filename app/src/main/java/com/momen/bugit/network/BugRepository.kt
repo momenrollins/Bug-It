@@ -1,27 +1,19 @@
 package com.momen.bugit.network
 
-import com.momen.bugit.network.BugItApiService
-import com.momen.bugit.network.ImageBBResponse
-import com.momen.bugit.network.AppendRequest
-import com.momen.bugit.network.GoogleSheetsAuthService
-import com.momen.bugit.network.DateUtils
-import com.momen.bugit.network.BugData
-import com.momen.bugit.network.ImageUploadResult
 import android.util.Base64
 import android.content.Context
-import android.net.Uri
 import java.io.InputStream
+import androidx.core.net.toUri
 
 class BugRepository(
     private val imageUploadService: BugItApiService,
-    private val sheetsService: BugItApiService,
     private val context: Context
 ) {
     private val googleSheetsAuthService = GoogleSheetsAuthService(context)
     
     suspend fun uploadImageFromUri(uriString: String, imageBBApiKey: String): Result<ImageUploadResult> {
         return try {
-            val uri = Uri.parse(uriString)
+            val uri = uriString.toUri()
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
             
             if (inputStream != null) {
@@ -60,8 +52,7 @@ class BugRepository(
     
     suspend fun submitBugToSheets(
         bugData: BugData,
-        spreadsheetId: String,
-        apiKey: String
+        spreadsheetId: String
     ): Result<Boolean> {
         return try {
             val today = DateUtils.getTodayString()

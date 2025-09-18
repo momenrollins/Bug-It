@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import android.content.Context
+import android.util.Log
+import com.momen.bugit.network.BugData
+import com.momen.bugit.network.DateUtils
 
 class BugFormViewModel : ViewModel() {
     private val _formState = MutableStateFlow(BugFormState())
@@ -20,7 +23,6 @@ class BugFormViewModel : ViewModel() {
 
     private fun getRepository(context: Context) = BugRepository(
         NetworkModule.imageUploadService,
-        NetworkModule.sheetsService,
         context
     )
 
@@ -41,13 +43,6 @@ class BugFormViewModel : ViewModel() {
     fun updateImagePath(imagePath: String) {
         _formState.value = _formState.value.copy(
             imagePath = imagePath,
-            errorMessage = ""
-        )
-    }
-
-    fun updateImageUrl(imageUrl: String) {
-        _formState.value = _formState.value.copy(
-            imageUrl = imageUrl,
             errorMessage = ""
         )
     }
@@ -94,43 +89,43 @@ class BugFormViewModel : ViewModel() {
                 var imageUrl = currentState.imageUrl
                 val repository = getRepository(context)
 
-                // Step 1: Upload image if needed
-                android.util.Log.d("BugIt", "Current state - imagePath: '${currentState.imagePath}', imageUrl: '${currentState.imageUrl}'")
-                
                 if (currentState.imagePath.isNotBlank() && currentState.imageUrl.isBlank()) {
-                    android.util.Log.d("BugIt", "Starting image upload...")
                     val uploadResult = if (currentState.imagePath.startsWith("content://")) {
-                        android.util.Log.d("BugIt", "Handling content URI: ${currentState.imagePath}")
-                        repository.uploadImageFromUri(currentState.imagePath, ApiConfig.IMAGEBB_API_KEY)
+                        Log.d("BugIt", "Handling content URI: ${currentState.imagePath}")
+                        repository.uploadImageFromUri(
+                            currentState.imagePath,
+                            ApiConfig.IMAGEBB_API_KEY
+                        )
                     } else {
-                        android.util.Log.d("BugIt", "Handling file path: ${currentState.imagePath}")
+                        Log.d("BugIt", "Handling file path: ${currentState.imagePath}")
                         val imageFile = File(currentState.imagePath)
-                        android.util.Log.d("BugIt", "Image file exists: ${imageFile.exists()}")
-                        
+
                         if (imageFile.exists()) {
                             try {
                                 val imageData = imageFile.readBytes()
-                                android.util.Log.d("BugIt", "Image data size: ${imageData.size} bytes")
                                 repository.uploadImage(imageData, ApiConfig.IMAGEBB_API_KEY)
                             } catch (e: Exception) {
-                                android.util.Log.e("BugIt", "Error reading image file: ${e.message}")
+                                Log.e("BugIt", "Error reading image file: ${e.message}")
                                 Result.failure(e)
                             }
                         } else {
-                            android.util.Log.e("BugIt", "Image file not found at: ${imageFile.absolutePath}")
+                            Log.e("BugIt", "Image file not found at: ${imageFile.absolutePath}")
                             Result.failure(Exception("Image file not found"))
                         }
                     }
 
                     if (uploadResult.isSuccess) {
                         imageUrl = uploadResult.getOrNull()?.imageUrl ?: ""
-                        android.util.Log.d("BugIt", "Image upload successful: $imageUrl")
+                        Log.d("BugIt", "Image upload successful: $imageUrl")
                         _formState.value = _formState.value.copy(
                             imageUrl = imageUrl,
                             submissionStep = SubmissionStep.SubmittingToSheets
                         )
                     } else {
-                        android.util.Log.e("BugIt", "Image upload failed: ${uploadResult.exceptionOrNull()?.message}")
+                        Log.e(
+                            "BugIt",
+                            "Image upload failed: ${uploadResult.exceptionOrNull()?.message}"
+                        )
                         _formState.value = currentState.copy(
                             isSubmitting = false,
                             submissionStep = SubmissionStep.Error,
@@ -139,35 +134,38 @@ class BugFormViewModel : ViewModel() {
                         return@launch
                     }
                 } else {
-                    android.util.Log.d("BugIt", "Skipping image upload - going directly to sheets submission")
+                    Log.d("BugIt", "Skipping image upload - going directly to sheets submission")
                     // Skip image upload, go directly to sheets submission
-                    _formState.value = _formState.value.copy(submissionStep = SubmissionStep.SubmittingToSheets)
+                    _formState.value =
+                        _formState.value.copy(submissionStep = SubmissionStep.SubmittingToSheets)
                 }
 
                 // Step 2: Submit to Google Sheets
-                android.util.Log.d("BugIt", "Submitting to Google Sheets...")
-                        val bugData = com.momen.bugit.network.BugData(
-                    timestamp = com.momen.bugit.network.DateUtils.getCurrentTimestamp(),
+                Log.d("BugIt", "Submitting to Google Sheets...")
+                val bugData = BugData(
+                    timestamp = DateUtils.getCurrentTimestamp(),
                     title = currentState.title,
                     description = currentState.description,
                     imageUrl = imageUrl
                 )
-                
+
                 val sheetsResult = repository.submitBugToSheets(
                     bugData = bugData,
-                    spreadsheetId = ApiConfig.GOOGLE_SHEETS_SPREADSHEET_ID,
-                    apiKey = ApiConfig.GOOGLE_SHEETS_API_KEY
+                    spreadsheetId = ApiConfig.GOOGLE_SHEETS_SPREADSHEET_ID
                 )
-                
+
                 if (sheetsResult.isSuccess) {
-                    android.util.Log.d("BugIt", "Google Sheets submission successful")
+                    Log.d("BugIt", "Google Sheets submission successful")
                     _formState.value = _formState.value.copy(
                         isSubmitting = false,
                         submissionStep = SubmissionStep.Success
                     )
                     onSuccess()
                 } else {
-                    android.util.Log.e("BugIt", "Google Sheets submission failed: ${sheetsResult.exceptionOrNull()?.message}")
+                    Log.e(
+                        "BugIt",
+                        "Google Sheets submission failed: ${sheetsResult.exceptionOrNull()?.message}"
+                    )
                     _formState.value = currentState.copy(
                         isSubmitting = false,
                         submissionStep = SubmissionStep.Error,
@@ -175,7 +173,7 @@ class BugFormViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                android.util.Log.e("BugIt", "Submission failed: ${e.message}")
+                Log.e("BugIt", "Submission failed: ${e.message}")
                 _formState.value = currentState.copy(
                     isSubmitting = false,
                     submissionStep = SubmissionStep.Error,

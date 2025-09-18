@@ -83,8 +83,7 @@ dependencies {
     
     // Google Sheets API
     implementation(libs.google.sheets.api)
-    implementation(libs.google.auth.library)
-    
+
     // Permissions
     implementation(libs.accompanist.permissions)
     
